@@ -1,6 +1,5 @@
 #create a 
 
-from app.routes import find_cluster
 
 class Pronoun: 
     def __init__(self, subjective, objective, possesive_weak, posessive_strong, reflexive):
