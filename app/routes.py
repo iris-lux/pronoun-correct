@@ -1,7 +1,7 @@
+from app.pronoun import Pronoun
 from flask import Flask,render_template,url_for,request
 from app import app 
 import re
-import pandas as pd
 import spacy
 from spacy.matcher import Matcher 
 from spacy import displacy
@@ -11,22 +11,11 @@ import neuralcoref
 nlp = spacy.load('en_core_web_sm')
 neuralcoref.add_to_pipe(nlp)
 
-def replace_word(orig_text, replaced, replacement):
-    matcher = Matcher(nlp.vocab)
-    matcher.add(replaced, None, [{"LOWER": replaced}])
-    doc = nlp(orig_text)
-    text = ''
-    buffer_start = 0
-    matches = matcher(doc)
-    for _, match_start, _ in matches:
-        if match_start > buffer_start:  # If we've skipped over some tokens, let's add those in (with trailing whitespace if available)
-            text += doc[buffer_start: match_start].text + doc[match_start - 1].whitespace_
-        text += replacement + doc[match_start].whitespace_  # Replace token, with trailing whitespace if available
-        buffer_start = match_start + 1
-    text += doc[buffer_start:].text
-    print(text)
-    return text
-    
+she_her_hers = Pronoun('she', 'her', 'her', 'hers', 'herself')
+he_him_his = Pronoun('he', 'him', 'his', 'his', 'himself')
+they_them_theirs = Pronoun('they', 'them', 'their', 'theirs', 'themself')
+
+
 def find_cluster(target_name, doc):
     for cluster in doc._.coref_clusters:
         print(cluster)
@@ -35,6 +24,7 @@ def find_cluster(target_name, doc):
     return None 
 
 def replace_pronouns(orig_text, name, pronoun_replacement):
+
     doc = nlp(orig_text)
     text = ''
     buffer_start = 0
@@ -44,6 +34,8 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
     #need to check if mention is pronoun
     for mention in name_cluster.mentions:
         if mention[0].pos_ == 'PRON' or mention[0].pos_ == 'DET':
+            print(mention[0].dep_)
+            print(mention[0].lemma_)
             if mention.start > buffer_start:  # If we've skipped over some tokens, let's add those in (with trailing whitespace if available)
                 text += doc[buffer_start: mention.start].text + doc[mention.start - 1].whitespace_
             text += pronoun_replacement + doc[mention.start].whitespace_  # Replace token, with trailing whitespace if available
