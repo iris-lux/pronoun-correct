@@ -63,8 +63,14 @@
     <div class="container">
     	<div class="alert alert-success" role="alert">
         <p class="alert-heading">Result</p>
-        <p>Number of Records:{{num_of_results}}</p>
-        <p>{{translated}}</p>
+        {%for chunk in translated%}
+          {%if chunk.is_pronoun%}
+            <b>{{chunk.text}}</b>
+          {%else%}
+            <span>{{chunk.text}}</span>
+          {%endif%}
+        {%endfor%}
+        <p>{{translated}}</p> 
     	</div>
     </div>
     

@@ -42,14 +42,53 @@ def pronoun_case(pronoun_text):
     }
     #find better default case?
     return pronoun_case_switch.get(pronoun_text, 'SUBJ')
+    
+def token_index(altered_token):
+    return altered_token.token.i
+
+def pronoun_replacement(pronoun):
+    replacement = pronoun.text
+
+    if pronoun.tag_ == 'PRP' or pronoun.tag_ == 'PRP$':
+        if pronoun.pos_ == 'DET': 
+            replacement = pronoun_replacement.equivalent_pronoun('POSS_WK') 
+    else: 
+        replacement = pronoun_replacement.equivalent_pronoun(pronoun_case(pronoun.text.lower()))
+    if(pronoun.text == pronoun.text.capitalize()):
+        replacement = replacement.capitalize()
+    return replacement 
+
+def head_replacement(head): 
+    if head.text == 'is':
+        return 'are' 
+    elif head.text == "'s":
+        return "'re" 
+    else:
+        return head.lemma_ 
+
+def list_pronouns(mentions):
+    #make this list a list of tuples? or a hash? hash two keys, altered_token, replacement 
+    pronouns = []
+    for mention in mentions:
+        if len(mention) == 1 and (mention[0].tag_ == 'PRP' or mention[0].tag_ == 'PRP$'):
+            print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
+            print(len(mention))
+            pronouns.append({'token': mention[0], 'replacement_text': pronoun_replacement(mention[0])})
+    return pronouns 
+
+def list_present_tense_heads(pronouns, pronoun_replacement):
+    present_tense_heads = []
+    for pronoun in pronouns:
+        if(pronoun_replacement.gramatically_plural and pronoun.dep_ == 'nsubj' and pronoun.head.tag_ == 'VBZ'):
+            present_tense_heads.append({'token': pronoun.head, 'replacement_text': head_replacement(pronoun.head)})
+    return present_tense_heads
 
 def replace_pronouns(orig_text, name, pronoun_replacement):
 
     #for singular they transformation
-    present_tense_heads = []
-    pronouns = []
+    
     doc = nlp(orig_text)
-    text = ''
+    text = []
     buffer_start = 0
     name_cluster = find_cluster(name, doc)
     if name_cluster == None:
@@ -57,11 +96,10 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
     #need to check if mention is pronoun
     print(name_cluster.mentions)
     
-    for mention in name_cluster.mentions:
-        if len(mention) == 1 and (mention[0].tag_ == 'PRP' or mention[0].tag_ == 'PRP$'):
-            print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
-            print(len(mention))
-            pronouns.append(mention[0])
+    pronouns = list_pronouns(name_cluster.mentions)
+    present_tense_heads = list_present_tense_heads(pronouns, pronoun_replacement)
+    altered_tokens = pronouns + present_tense_heads 
+    altered_tokens = altered_tokens.sort(key=token_index)
 
     for pronoun in pronouns:
         # print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
@@ -74,9 +112,6 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
             
             if(pronoun.text == pronoun.text.capitalize()):
                 replacement = replacement.capitalize()
-            
-            if(pronoun_replacement.gramatically_plural and pronoun.dep_ == 'nsubj' and pronoun.head.tag_ == 'VBZ'):
-                present_tense_heads.append(pronoun.head)
             #special case for DET 
             #print(mention[0].text, 'dep', mention[0].dep_)
             #print(mention[0].text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
@@ -86,14 +121,18 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
             #print(mention[0].head.text, 'tag', mention[0].head.tag_, spacy.explain(mention[0].head.tag_))
             # if replacement pronoun is they/them AND pronoun is the subject, add token to an array 
             if pronoun.i > buffer_start:  # If we've skxipped over some tokens, let's add those in (with trailing whitespace if available)
-                text += doc[buffer_start: pronoun.i].text + doc[pronoun.i- 1].whitespace_
-            text += replacement + doc[pronoun.i].whitespace_  # Replace token, with trailing whitespace if available
+                text += [{'text': doc[buffer_start: pronoun.i].text + doc[pronoun.i- 1].whitespace_, 'is_pronoun': False}]
+            text += [{'text': replacement, 'is_pronoun': True}] 
+            text += {'text': doc[pronoun.i].whitespace_, 'is_pronoun': False}  # Replace token, with trailing whitespace if available
             buffer_start = pronoun.i + 1
 
-    text += doc[buffer_start:].text
+    text +=  {'text': doc[buffer_start:].text, 'is_pronoun': False}
     if(len(present_tense_heads) > 0): 
         text = pluralize_present_heads(text, present_tense_heads)
     return text
+
+
+
 
 def pluralize_present_heads(orig_text, heads):
     doc = nlp(orig_text)
@@ -101,6 +140,7 @@ def pluralize_present_heads(orig_text, heads):
     buffer_start = 0
 
     print(heads)
+    #add these to an array that also includes pronouns? sort them by .i 
     for head in heads:
         if head.i > buffer_start:
             text += doc[buffer_start:head.i].text + doc[head.i - 1].whitespace_ 
@@ -136,8 +176,8 @@ def process():
         'they' : Pronoun('they', 'them', 'their', 'theirs', 'themself', True)
     }
 
-    output = replace_pronouns(rawtext, name, pronoun_replacements[pronoun_option])
-
+    # output = replace_pronouns(rawtext, name, pronoun_replacements[pronoun_option])
+    output = [{"text": 'This is a block of text', 'is_pronoun': False}, {"text": 'broken into chunks', 'is_pronoun': True}, {"text": 'for stylization', 'is_pronoun': False}]
     return render_template("index.html", translated = output)
 
 
