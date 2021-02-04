@@ -9,8 +9,8 @@ import en_core_web_sm
 import neuralcoref 
 
 nlp = spacy.load('en_core_web_sm')
-#neuralcoref.add_to_pipe(nlp)
-neuralcoref.add_to_pipe(nlp, greedyness=0.6)
+neuralcoref.add_to_pipe(nlp)
+#have a switch for updating they/them pronouns: neuralcoref.add_to_pipe(nlp, greedyness=0.6)
 she_her_hers = Pronoun('she', 'her', 'her', 'hers', 'herself')
 he_him_his = Pronoun('he', 'him', 'his', 'his', 'himself')
 they_them_theirs = Pronoun('they', 'them', 'their', 'theirs', 'themself')
@@ -58,29 +58,25 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
     print(name_cluster.mentions)
     
     for mention in name_cluster.mentions:
-        if mention[0].tag_ == 'PRP' or mention[0].tag_ == 'PRP$':
+        if len(mention) == 1 and (mention[0].tag_ == 'PRP' or mention[0].tag_ == 'PRP$'):
             print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
             print(len(mention))
             pronouns.append(mention[0])
-            
-    for mention in name_cluster.mentions:
+
+    for pronoun in pronouns:
         # print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
         # print(len(mention))
-        if mention[0].tag_ == 'PRP' or mention[0].tag_ == 'PRP$':
-            print(mention.text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
-            print(len(mention))
-            if mention[0].pos_ == 'DET': 
+        if pronoun.tag_ == 'PRP' or pronoun.tag_ == 'PRP$':
+            if pronoun.pos_ == 'DET': 
                 replacement = pronoun_replacement.equivalent_pronoun('POSS_WK') 
             else: 
-                replacement = pronoun_replacement.equivalent_pronoun(pronoun_case(mention[0].text.lower()))
+                replacement = pronoun_replacement.equivalent_pronoun(pronoun_case(pronoun.text.lower()))
             
-            if(mention[0].text == mention[0].text.capitalize()):
+            if(pronoun.text == pronoun.text.capitalize()):
                 replacement = replacement.capitalize()
             
-            if(pronoun_replacement.gramatically_plural and mention[0].dep_ == 'nsubj' and mention[0].head.tag_ == 'VBZ'):
-                present_tense_heads.append(mention[0].head)
-                
-            
+            if(pronoun_replacement.gramatically_plural and pronoun.dep_ == 'nsubj' and pronoun.head.tag_ == 'VBZ'):
+                present_tense_heads.append(pronoun.head)
             #special case for DET 
             #print(mention[0].text, 'dep', mention[0].dep_)
             #print(mention[0].text, 'tag', mention[0].tag_, spacy.explain(mention[0].tag_))
@@ -89,10 +85,11 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
             #print('head', mention[0].head.i)
             #print(mention[0].head.text, 'tag', mention[0].head.tag_, spacy.explain(mention[0].head.tag_))
             # if replacement pronoun is they/them AND pronoun is the subject, add token to an array 
-            if mention[0].i > buffer_start:  # If we've skxipped over some tokens, let's add those in (with trailing whitespace if available)
-                text += doc[buffer_start: mention[0].i].text + doc[mention[0].i- 1].whitespace_
-            text += replacement + doc[mention[0].i].whitespace_  # Replace token, with trailing whitespace if available
-            buffer_start = mention[0].i + 1
+            if pronoun.i > buffer_start:  # If we've skxipped over some tokens, let's add those in (with trailing whitespace if available)
+                text += doc[buffer_start: pronoun.i].text + doc[pronoun.i- 1].whitespace_
+            text += replacement + doc[pronoun.i].whitespace_  # Replace token, with trailing whitespace if available
+            buffer_start = pronoun.i + 1
+
     text += doc[buffer_start:].text
     if(len(present_tense_heads) > 0): 
         text = pluralize_present_heads(text, present_tense_heads)
