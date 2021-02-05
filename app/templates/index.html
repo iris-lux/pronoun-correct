@@ -64,10 +64,12 @@
     	<div class="alert alert-success" role="alert">
         <p class="alert-heading">Result</p>
         {%for chunk in translated%}
-          {%if chunk.is_pronoun%}
-            <b>{{chunk.text}}</b>
-          {%else%}
-            <span>{{chunk.text}}</span>
+          {%if chunk.text%}
+            {%if chunk.is_pronoun%}
+              <b>{{chunk.text}}</b>
+            {%else%}
+              <span>{{chunk.text}}</span>
+            {%endif%}
           {%endif%}
         {%endfor%}
         <p>{{translated}}</p> 
