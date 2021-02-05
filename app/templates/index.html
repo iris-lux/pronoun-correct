@@ -61,16 +61,14 @@
     </div>
 
     <div class="container">
-    	<div class="alert alert-success" role="alert">
+    	<div class="alert alert-success" role="alert" style = 'white-space:pre-wrap;'>
         <p class="alert-heading">Result</p>
         {%for chunk in translated%}
-          {%if chunk.text%}
-            {%if chunk.is_pronoun%}
+            {%-if chunk.is_pronoun -%}
               <b>{{chunk.text}}</b>
-            {%else%}
+            {%- else -%}
               <span>{{chunk.text}}</span>
-            {%endif%}
-          {%endif%}
+            {%- endif -%}
         {%endfor%}
         <p>{{translated}}</p> 
     	</div>

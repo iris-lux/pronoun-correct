@@ -114,34 +114,11 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
         buffer_start = altered_token['token'].i + 1
 
     text +=  [{'text': doc[buffer_start:].text, 'is_pronoun': False}]
+
+    text = [altered_token for altered_token in text if altered_token["text"] != '']
+
     return text
 
-
-
-
-def pluralize_present_heads(orig_text, heads):
-    doc = nlp(orig_text)
-    text = ''
-    buffer_start = 0
-
-    print(heads)
-    #add these to an array that also includes pronouns? sort them by .i 
-    for head in heads:
-        if head.i > buffer_start:
-            text += doc[buffer_start:head.i].text + doc[head.i - 1].whitespace_ 
-
-        if head.text == 'is':
-             text += 'are' + doc[head.i].whitespace_
-        elif head.text == "'s":
-            text += "'re" + doc[head.i].whitespace_
-        else:
-            text += head.lemma_ + doc[head.i].whitespace_
-
-        buffer_start = head.i + 1 
-
-    text += doc[buffer_start:].text
-
-    return text  
 
 @app.route('/')
 @app.route('/index')
@@ -163,8 +140,7 @@ def process():
 
     output = replace_pronouns(rawtext, name, pronoun_replacements[pronoun_option])
 
-    for chunk in output:
-        print(not not chunk['text']) 
+
 
     print(output)
     # output = [{"text": 'This is a block of text', 'is_pronoun': False}, {"text": 'broken into chunks', 'is_pronoun': True}, {"text": 'for stylization', 'is_pronoun': False}]
