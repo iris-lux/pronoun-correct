@@ -11,10 +11,6 @@ import neuralcoref
 nlp = spacy.load('en_core_web_sm')
 neuralcoref.add_to_pipe(nlp)
 #have a switch for updating they/them pronouns: neuralcoref.add_to_pipe(nlp, greedyness=0.6)
-she_her_hers = Pronoun('she', 'her', 'her', 'hers', 'herself')
-he_him_his = Pronoun('he', 'him', 'his', 'his', 'himself')
-they_them_theirs = Pronoun('they', 'them', 'their', 'theirs', 'themself')
-
 
 def find_cluster(target_name, doc):
     for cluster in doc._.coref_clusters:
@@ -87,7 +83,8 @@ def list_present_tense_heads(pronouns, pronoun_replacement):
 def replace_pronouns(orig_text, name, pronoun_replacement):
 
     #for singular they transformation
-    
+    #text, indexes to revert. 
+    #cache? 
     doc = nlp(orig_text)
     text = []
     buffer_start = 0
@@ -108,9 +105,9 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
     for altered_token in altered_tokens:
 
         if altered_token['token'].i > buffer_start:  # If we've skxipped over some tokens, let's add those in (with trailing whitespace if available)
-            text += [{'text': doc[buffer_start: altered_token['token'].i].text + doc[altered_token['token'].i- 1].whitespace_, 'is_pronoun': False}]
-        text += [{'text': altered_token['replacement_text'], 'is_pronoun': True}] 
-        text += [{'text': doc[altered_token['token'].i].whitespace_, 'is_pronoun': False}]  # Replace token, with trailing whitespace if available
+            text += [{'text': doc[buffer_start: altered_token['token'].i].text + doc[altered_token['token'].i- 1].whitespace_, 'is_pronoun': False, 'index': altered_token['token'].i, 'orig_text': altered_token['token'].text}]
+        text += [{'text': altered_token['replacement_text'], 'is_pronoun': True, 'index': altered_token['token'].i, 'orig_text': altered_token['token'].text}] 
+        text += [{'text': doc[altered_token['token'].i].whitespace_, 'is_pronoun': False, 'index': altered_token['token'].i, 'orig_text': altered_token['token'].text}]  # Replace token, with trailing whitespace if available
         buffer_start = altered_token['token'].i + 1
 
     text +=  [{'text': doc[buffer_start:].text, 'is_pronoun': False}]
@@ -118,7 +115,6 @@ def replace_pronouns(orig_text, name, pronoun_replacement):
     text = [altered_token for altered_token in text if altered_token["text"] != '']
 
     return text
-
 
 @app.route('/')
 @app.route('/index')
@@ -143,9 +139,11 @@ def process():
 
 
     print(output)
-    # output = [{"text": 'This is a block of text', 'is_pronoun': False}, {"text": 'broken into chunks', 'is_pronoun': True}, {"text": 'for stylization', 'is_pronoun': False}]
-    return render_template("index.html", translated = output)
 
+    return render_template("index.html", translated = output, orig_text = rawtext)
+@app.route('/revert', methods = ["POST"])
+def revert():
+    return None
 
 if __name__ == '__main__':
 	app.run(debug=True)
