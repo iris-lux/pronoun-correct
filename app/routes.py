@@ -14,12 +14,6 @@ from simplenlg.phrasespec import SPhraseSpec
 from simplenlg.features import Feature 
 import re 
 
-
-
-
-
-#have a switch for updating they/them pronouns: neuralcoref.add_to_pipe(nlp, greedyness=0.6)
-
 def find_cluster(target_name, doc):
     for cluster in doc._.coref_clusters:
         print(cluster)
@@ -73,6 +67,9 @@ def head_replacement(head):
 # if pronoun_replacement is not gramatically plural, and if pronoun.text is they/them/theirs/themselves/themself
 # then append hash of head token and method call to replace_plural_head(head)
 def replace_plural_head(head): 
+    print(head.text)
+    if(head.text == "'re"):
+        return "'s"
     regex = re.compile('[a-z]+')
     lex = Lexicon.getDefaultLexicon()
     realiser = Realiser(lex)
@@ -80,7 +77,11 @@ def replace_plural_head(head):
     p = nlgFactory.createClause()
     p.setVerb(head.text)
     p.setSubject("she")
-    return regex.match(realiser.realiseSentence(p).split(" ")[1]).group()
+    verb_match = regex.match(realiser.realiseSentence(p).split(" ")[1])
+    if(verb_match):
+        return verb_match.group() 
+    else: 
+        return head.text
 
 def list_pronouns(mentions, pronoun_replacement):
     #make this list a list of tuples? or a hash? hash two keys, altered_token, replacement 
@@ -101,7 +102,7 @@ def list_present_tense_heads(pronouns, pronoun_replacement):
         if(pronoun_replacement.gramatically_plural and pronoun['token'].dep_ == 'nsubj' and pronoun['token'].head.tag_ == 'VBZ'):
             print(spacy.explain(pronoun['token'].head.tag_))
             present_tense_heads.append({'token': pronoun['token'].head, 'replacement_text': head_replacement(pronoun['token'].head)})
-        elif((pronoun['token'].text in they_them ) and pronoun['token'].dep_ == 'nsubj' and pronoun['token'].head.tag_ == 'VBP'):
+        elif((pronoun['token'].text.lower() in they_them ) and pronoun['token'].dep_ == 'nsubj' and pronoun['token'].head.tag_ == 'VBP'):
             present_tense_heads.append({'token': pronoun['token'].head, 'replacement_text': replace_plural_head(pronoun['token'].head)})
 
     return present_tense_heads
@@ -173,9 +174,9 @@ def process():
 
 
     return render_template("index.html", translated = output, orig_text = rawtext)
-@app.route('/revert', methods = ["POST"])
-def revert():
-    return None
+@app.route('/about')
+def about():
+    return render_template("about.html")
 
 if __name__ == '__main__':
 	app.run(debug=True)

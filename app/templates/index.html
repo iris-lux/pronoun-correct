@@ -20,34 +20,54 @@
     </script>
 </head>
 
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="{{ url_for('index') }}">PronounCorrect</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('about') }}">About</a></li>
+    </ul>
+  </div>
+</nav>
 <body>
 <br/>
-<br/>
+<br/> 
 <br/>
     <div class="container">
         
         <form method="POST" action="/process">
             <div class="form-group">
                     <label>Your Text</label>
-            <textarea type="text" rows="5" cols="5" class="form-control"  name="rawtext" required="true"></textarea>
+            <textarea type="text" rows="5" cols="5" class="form-control"  name="rawtext" required="true" id = 'area'></textarea>
             <br/>
-            Are you correcting they pronouns?  <input type="checkbox" name="correcting_they" value= {{True}}></input>
-            Who's pronoun are you correcting? <input type = "text" name = "name" required = "true"></input>
-            Correct pronoun: 
-            <select class="custom-select" name = 'pronoun_replacement'>
-              <option selected>Pronoun options</option>
-              <option value="they">They/Them/Theirs</option>
-              <option value="she">She/Her/Hers</option>
-              <option value="he">He/Him/His</option>
-            </select>
-			      <br/>
-            <button type="reset" class="btn btn-primary"><i class="fa fa-eraser"></i> Clear</button>
-            <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Submit</button>
-        </div>
+            <div class="row">
+              <div class="form-check">
+                <input class ="form-check-input" type="checkbox" id = "correcting_they" name="correcting_they" value= {{True}} >
+                <label class = "form-check-label" for="correcting_they">Check if you are correcting they pronouns: </label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group col-lg-3">
+                <label for="name">Who's pronoun are you correcting? </label>
+                <input type = "text" id = "name" name = "name" required = "true" class ="form-control input-sm">
+              </div>
+              <div class="form-group col-lg-3">
+                <label for="pronoun_replacement">Correct Pronoun</label>
+                <select class="form-control" name = 'pronoun_replacement' id = 'pronoun_replacement'>
+                  <option value="they">They/Them/Theirs</option>
+                  <option value="she">She/Her/Hers</option>
+                  <option value="he">He/Him/His</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Correct</button>
+          </div>
         </form>
     </div>
     <div class="container">
-    	<div class="alert alert-success" role="alert" style = 'white-space:pre-wrap;'>
+    	<div class="alert alert-success" role="alert" style = 'white-space:pre-wrap;'id = "corrections">
         {%for chunk in translated%}
             {%-if chunk.is_pronoun -%}
               <a href = '#' class = 'corrected_text' style="color: rgb(192, 19, 106);font-weight: bold;" id = {{'corrected_' ~ chunk.index}} onclick='revertChange("{{chunk.orig_text}}", "{{chunk.index}}")' data-toggle="tooltip" title="Corrected: click to revert change">{{chunk.text}}</a> 
