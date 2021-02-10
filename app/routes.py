@@ -16,8 +16,7 @@ import re
 
 def find_cluster(target_name, doc):
     for cluster in doc._.coref_clusters:
-        print(cluster)
-        if(cluster.main.text == target_name):
+        if(cluster.main.text.strip() == target_name.strip()):
             return cluster 
     return None 
 
@@ -46,7 +45,8 @@ def token_index(altered_token):
 
 def pronoun_replacement_text(pronoun, pronoun_replacement):
     #replacement = pronoun.text
-    if pronoun.pos_ == 'DET': 
+    print(pronoun.text, pronoun.tag_, spacy.explain(pronoun.tag_), pronoun.pos_, pronoun_case(pronoun.text.lower()), pronoun_replacement.equivalent_pronoun(pronoun_case(pronoun.text.lower())))
+    if pronoun.pos_ == 'DET' and pronoun.text.lower() != 'hers': 
         replacement = pronoun_replacement.equivalent_pronoun('POSS_WK') 
     else: 
         replacement = pronoun_replacement.equivalent_pronoun(pronoun_case(pronoun.text.lower()))
@@ -85,6 +85,7 @@ def replace_plural_head(head):
 
 def list_pronouns(mentions, pronoun_replacement):
     #make this list a list of tuples? or a hash? hash two keys, altered_token, replacement 
+    print('list pronouns')
     pronouns = []
     it_its = ['it', 'its']
     for mention in mentions:
@@ -113,8 +114,9 @@ def replace_pronouns(orig_text, name, pronoun_replacement, nlp, correcting_they_
     #for singular they transformation
     #text, indexes to revert. 
     #cache? 
-
+    
     if(correcting_they_pronouns):
+        print('here')
         nlp.remove_pipe("neuralcoref")  # This remove the current neuralcoref instance from SpaCy pipe
         neuralcoref.add_to_pipe(nlp, greedyness=0.6)
 
@@ -123,13 +125,19 @@ def replace_pronouns(orig_text, name, pronoun_replacement, nlp, correcting_they_
     buffer_start = 0
     name_cluster = find_cluster(name, doc)
     if name_cluster == None:
-        return 'No Match'
+        nlp.remove_pipe("neuralcoref")  # This remove the current neuralcoref instance from SpaCy pipe
+        neuralcoref.add_to_pipe(nlp, greedyness=0.6)
+        doc = nlp(orig_text)
+        name_cluster = find_cluster(name, doc)
+        if(name_cluster == None):
+            return [{'text': 'No Match', 'is_pronoun': False}] 
     #need to check if mention is pronoun
     print(name_cluster.mentions)
     
     pronouns = list_pronouns(name_cluster.mentions, pronoun_replacement)
     present_tense_heads = list_present_tense_heads(pronouns, pronoun_replacement)
-
+    
+    print(present_tense_heads)
     altered_tokens = pronouns + present_tense_heads 
     altered_tokens.sort(key=lambda altered_token: altered_token['token'].i)
     print('altered_tokens', altered_tokens)

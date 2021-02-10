@@ -17,6 +17,10 @@
       {
       document.getElementById(`corrected_${idx}`).innerHTML = orig_text;
       }
+      document.addEventListener('copy', (event) => {
+        event.clipboardData.setData('text', document.getSelection().toString());
+        event.preventDefault();
+      });
     </script>
 </head>
 
@@ -32,53 +36,49 @@
   </div>
 </nav>
 <body>
+
 <br/>
-<br/> 
-<br/>
-    <div class="container">
-        
+<div class = "container" style= "margin-left: auto; margin-right: auto;">
+<div class = "row h-100 justify-content-center align-items-center">
+    <div class="col-lg-8">
         <form method="POST" action="/process">
-            <div class="form-group">
-                    <label>Your Text</label>
-            <textarea type="text" rows="5" cols="5" class="form-control"  name="rawtext" required="true" id = 'area'></textarea>
-            <br/>
-            <div class="row">
-              <div class="form-check">
-                <input class ="form-check-input" type="checkbox" id = "correcting_they" name="correcting_they" value= {{True}} >
-                <label class = "form-check-label" for="correcting_they">Check if you are correcting they pronouns: </label>
+          <div class="form-group" id = "upper-input">
+            <label>Your Text</label>
+            <textarea type="text" rows="12" style = "width: 100%; height: 100%; box-sizing: border-box;" class="form-control"  name="rawtext" required="true" id = 'area' placeholder = "Enter or paste your text"></textarea>
+          </div>
+          <div class="row" id = "lower-input">
+              <div class="form-group col-lg-6">
+                <label for="name">Whose pronouns are you correcting? </label>
+                <input type = "text" id = "name" name = "name" required = "true" class ="form-control input-sm" placeholder = "Enter name here">
               </div>
-            </div>
-            <div class="row">
-              <div class="form-group col-lg-3">
-                <label for="name">Who's pronoun are you correcting? </label>
-                <input type = "text" id = "name" name = "name" required = "true" class ="form-control input-sm">
-              </div>
-              <div class="form-group col-lg-3">
+              <div class="form-group col-lg-6">
                 <label for="pronoun_replacement">Correct Pronoun</label>
-                <select class="form-control" name = 'pronoun_replacement' id = 'pronoun_replacement'>
+                <select class="form-control input-sm" name = 'pronoun_replacement' id = 'pronoun_replacement'>
                   <option value="they">They/Them/Theirs</option>
                   <option value="she">She/Her/Hers</option>
                   <option value="he">He/Him/His</option>
                 </select>
               </div>
             </div>
-            <button type="submit" class="btn btn-info"><i class="fa fa-database"></i> Correct</button>
+            <button type="submit" class="btn btn-info"><i class="fa fa-database"></i>Correct</button>
           </div>
         </form>
-    </div>
-    <div class="container">
-    	<div class="alert alert-success" role="alert" style = 'white-space:pre-wrap;'id = "corrections">
-        {%for chunk in translated%}
-            {%-if chunk.is_pronoun -%}
-              <a href = '#' class = 'corrected_text' style="color: rgb(192, 19, 106);font-weight: bold;" id = {{'corrected_' ~ chunk.index}} onclick='revertChange("{{chunk.orig_text}}", "{{chunk.index}}")' data-toggle="tooltip" title="Corrected: click to revert change">{{chunk.text}}</a> 
-            {%- else -%}
-              <span>{{chunk.text}}</span>
-            {%- endif -%}
-        {%endfor%}
-    	</div>
-    </div>
 
-  </body>
-</html>
-
+        <div class="container" style = 'white-space:pre-wrap;'>
+        {%-if translated -%} 
+          <div class="alert alert-success" role="alert" style = 'white-space:pre-wrap;'id = "corrections">
+            {%-for chunk in translated-%}
+                {%-if chunk.is_pronoun -%}
+                  <a href = '#' class = 'corrected_text' style="color: rgb(192, 19, 106);font-weight: bold;" id = {{'corrected_' ~ chunk.index}} onclick='revertChange("{{chunk.orig_text}}", "{{chunk.index}}")' data-toggle="tooltip" title="Corrected: click to revert change">{{chunk.text}}</a> 
+                {%- else -%}
+                  <span>{{chunk.text}}</span>
+                {%- endif -%}
+            {%endfor%}
+          {%- endif -%} 
+          </div>
+        </div>
+  </div>
+</div>
+</div>
+</body>
 </html>
