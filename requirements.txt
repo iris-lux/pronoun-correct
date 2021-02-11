@@ -1,3 +1,4 @@
+setuptools==53.0.0 
 Cython==0.29.21
 spacy==2.3.5
 pytest==6.2.2
