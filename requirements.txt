@@ -1,6 +1,6 @@
 Cython==0.29.21
 spacy==2.3.5
-pytest
+pytest==6.2.2
 -e git+https://github.com/huggingface/neuralcoref.git@cc78653d14259b2dfed3280d6a6c87553ba5f8b3#egg=neuralcoref
 attrs==20.3.0
 blis==0.7.4
@@ -29,7 +29,6 @@ preshed==3.0.5
 py==1.10.0
 pydantic==1.7.3
 pyparsing==2.4.7
-pytest==6.2.2
 python-dateutil==2.8.1
 python-dotenv==0.15.0
 requests==2.25.1
