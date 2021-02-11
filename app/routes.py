@@ -4,7 +4,6 @@ from app import app
 import re
 import spacy
 from spacy.matcher import Matcher 
-from spacy import displacy
 import neuralcoref 
 from simplenlg.lexicon import Lexicon 
 from simplenlg.realiser.english import Realiser  
