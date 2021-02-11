@@ -1,3 +1,6 @@
+Cython==0.29.21
+spacy==2.3.5
+pytest
 -e git+https://github.com/huggingface/neuralcoref.git@cc78653d14259b2dfed3280d6a6c87553ba5f8b3#egg=neuralcoref
 attrs==20.3.0
 blis==0.7.4
@@ -8,7 +11,6 @@ certifi==2020.12.5
 chardet==4.0.0
 click==7.1.2
 cymem==2.0.5
-Cython==0.29.21
 Flask==1.1.2
 gunicorn==20.0.4
 idna==2.10
@@ -35,7 +37,6 @@ s3transfer==0.3.4
 simplenlg==0.2.0
 six==1.15.0
 smart-open==3.0.0
-spacy==2.3.5
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz#egg=en_core_web_sm
 spacy-legacy==3.0.1
 srsly==1.0.5
