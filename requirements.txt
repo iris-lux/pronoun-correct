@@ -1,7 +1,7 @@
 Cython==0.29.21
 spacy==2.3.5
 pytest==6.2.2
-https://github.com/huggingface/neuralcoref/archive/v4.0.0.tar.gz
+neuralcoref==4.0.0 --no-binary neuralcoref
 attrs==20.3.0
 blis==0.7.4
 boto3==1.16.63
