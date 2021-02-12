@@ -39,7 +39,7 @@ smart-open==3.0.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.1.0/en_core_web_sm-2.1.0.tar.gz#egg=en_core_web_sm
 spacy-legacy==3.0.1
 srsly==1.0.5
-thinc==7.4.5
+thinc==7.0.2
 toml==0.10.2
 tqdm==4.56.0
 typer==0.3.2
