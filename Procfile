@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn pronoun-correct:app
