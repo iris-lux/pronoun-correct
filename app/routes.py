@@ -1,6 +1,6 @@
 import sys
 sys.path.append('/home/ubuntu/pronoun-correct/lib/python3.8/site-packages')
-print(sys)
+print(sys.path)
 from app.pronoun import Pronoun
 from flask import Flask,render_template,url_for,request
 from app import app 
