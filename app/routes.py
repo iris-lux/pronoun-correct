@@ -1,3 +1,5 @@
+import sys
+print(sys.path)
 from app.pronoun import Pronoun
 from flask import Flask,render_template,url_for,request
 from app import app 
